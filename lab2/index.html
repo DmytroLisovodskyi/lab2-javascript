@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторна робота №2 — ООП у JavaScript</title>
+    <style>
+        body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #202733;
+            background: #f3f6fa;
+        }
+
+        header, section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: 0 3px 14px #17203310;
+        }
+
+        h1, h2 {
+            color: #174a78;
+        }
+
+        button {
+            background: #1769aa;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 10px 14px;
+            cursor: pointer;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            background: #101820;
+            color: #e6edf3;
+            padding: 16px;
+            border-radius: 8px;
+            min-height: 120px;
+        }
+
+        .small {
+            color: #566575;
+            font-size: 0.95rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            background: #f5f8fb;
+            padding: 12px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Лабораторна робота №2</h1>
+    <h2>Об’єктно-орієнтоване програмування у JavaScript</h2>
+    <p>Виконавець: Lisovodskyi</p>
+    <p class="small">
+        Об’єкти, функції-конструктори, prototype, класи ES6,
+        успадкування та функції вищого порядку.
+    </p>
+</header>
+
+<section>
+    <h2>Результати виконання</h2>
+
+    <div class="grid">
+        <div class="card">
+            <b>Об’єкти автомобілів</b>
+            <p id="cars"></p>
+        </div>
+
+        <div class="card">
+            <b>Вантажівки та водії</b>
+            <p id="trucks"></p>
+        </div>
+
+        <div class="card">
+            <b>Геометричні фігури</b>
+            <p id="shapes"></p>
+        </div>
+
+        <div class="card">
+            <b>Функції вищого порядку</b>
+            <p id="functions"></p>
+        </div>
+    </div>
+
+    <button onclick="runAll()">Запустити перевірку ще раз</button>
+</section>
+
+<section>
+    <h2>Консоль виконання</h2>
+    <p class="small">
+        Результати також доступні у консолі браузера
+        (F12 → Console).
+    </p>
+    <pre id="output"></pre>
+</section>
+
+<script>
+// Виведення результатів
+const output = document.getElementById("output");
+
+function log(...args) {
+    const text = args.map(value =>
+        typeof value === "object"
+            ? JSON.stringify(value)
+            : String(value)
+    ).join(" ");
+
+    console.log(...args);
+    output.textContent += text + "\n";
+}
+
+// 1.2.3–1.2.6. Створення об'єктів автомобілів
+
+const car1 = new Object();
+
+car1.color = "blue";
+car1.maxSpeed = 220;
+car1.driver = {
+    name: "Lisovodskyi",
+    category: "C",
+    "personal limitations": "No driving at night"
+};
+car1.tuning = true;
+car1["number of accidents"] = 0;
+
+car1.drive = function () {
+    log("car1:", "I am not driving at night");
+};
+
+const car2 = {
+    color: "red",
+    maxSpeed: 180,
+
+    driver: {
+        name: "Lisovodskyi",
+        category: "B",
+        "personal limitations": null
+    },
+
+    tuning: false,
+    "number of accidents": 2,
+
+    drive: function () {
+        log("car2:", "I can drive anytime");
+    }
+};
+
+// 1.2.7–1.2.10. Функція-конструктор Truck
+
+function Truck(color, weight, avgSpeed, brand, model) {
+    this.color = color;
+    this.weight = weight;
+    this.avgSpeed = avgSpeed;
+    this.brand = brand;
+    this.model = model;
+
+    this.trip = function () {
+        if (!this.driver) {
+            log(this.brand + " " + this.model + ": No driver assigned");
+            return;
+        }
+
+        const nightMessage = this.driver.nightDriving
+            ? "drives at night"
+            : "does not drive at night";
+
+        log(
+            "Driver " + this.driver.name + " " +
+            nightMessage +
+            " and has " + this.driver.experience +
+            " years of experience"
+        );
+    };
+}
+
+Truck.prototype.AssignDriver = function (
+    name,
+    nightDriving,
+    experience
+) {
+    this.driver = {
+        name: name,
+        nightDriving: nightDriving,
+        experience: experience
+    };
+};
+
+// 1.2.12–1.2.15. Клас Square
+
+class Square {
+    constructor(a) {
+        if (!Number.isInteger(a) || a <= 0) {
+            throw new Error("Сторона квадрата має бути додатним цілим числом");
+        }
+
+        this.a = a;
+    }
+
+    static help() {
+        return "Квадрат має 4 рівні сторони та 4 прямі кути.";
+    }
+
+    length() {
+        return 4 * this.a;
+    }
+
+    square() {
+        return this.a * this.a;
+    }
+
+    info() {
+        return `Квадрат: сторони ${this.a}, ${this.a}, ${this.a}, ${this.a};
+кути 90°, 90°, 90°, 90°;
+периметр ${this.length()};
+площа ${this.square()}.`;
+    }
+}
+
+// 1.2.16–1.2.17. Клас Rectangle
+
+class Rectangle extends Square {
+    constructor(a, b) {
+        super(a);
+
+        if (!Number.isInteger(b) || b <= 0) {
+            throw new Error("Ширина має бути додатним цілим числом");
+        }
+
+        this.b = b;
+    }
+
+    static help() {
+        return "Прямокутник має протилежні рівні сторони та 4 прямі кути.";
+    }
+
+    length() {
+        return 2 * (this.a + this.b);
+    }
+
+    square() {
+        return this.a * this.b;
+    }
+
+    info() {
+        return `Прямокутник: сторони ${this.a}, ${this.b}, ${this.a}, ${this.b};
+кути 90°, 90°, 90°, 90°;
+периметр ${this.length()};
+площа ${this.square()}.`;
+    }
+}
+
+// 1.2.18–1.2.19. Клас Rhombus
+
+class Rhombus extends Square {
+    constructor(a, alpha, beta) {
+        super(a);
+        this.alpha = alpha;
+        this.beta = beta;
+
+        if (alpha + beta !== 180 ||
+            alpha <= 90 || beta >= 90 ||
+            beta <= 0) {
+            throw new Error(
+                "Для ромба alpha має бути тупим, beta — гострим; сума 180°"
+            );
+        }
+    }
+
+    static help() {
+        return "Ромб має 4 рівні сторони; протилежні кути рівні.";
+    }
+
+    length() {
+        return 4 * this.a;
+    }
+
+    square() {
+        return this.a * this.a *
+            Math.sin(this.beta * Math.PI / 180);
+    }
+
+    info() {
+        return `Ромб: сторони ${this.a}, ${this.a}, ${this.a}, ${this.a};
+кути ${this.alpha}°, ${this.beta}°, ${this.alpha}°, ${this.beta}°;
+периметр ${this.length()};
+площа ≈ ${this.square().toFixed(2)}.`;
+    }
+}
+
+// 1.2.20–1.2.21. Клас Parallelogram
+
+class Parallelogram extends Rectangle {
+    constructor(a, b, alpha, beta) {
+        super(a, b);
+
+        if (alpha + beta !== 180 ||
+            alpha <= 90 || beta >= 90 ||
+            beta <= 0) {
+            throw new Error(
+                "Кути паралелограма мають бути суміжними: сума 180°"
+            );
+        }
+
+        this.alpha = alpha;
+        this.beta = beta;
+    }
+
+    static help() {
+        return "Паралелограм має попарно паралельні протилежні сторони.";
+    }
+
+    length() {
+        return 2 * (this.a + this.b);
+    }
+
+    square() {
+        return this.a * this.b *
+            Math.sin(this.beta * Math.PI / 180);
+    }
+
+    info() {
+        return `Паралелограм: сторони ${this.a}, ${this.b}, ${this.a}, ${this.b};
+кути ${this.alpha}°, ${this.beta}°, ${this.alpha}°, ${this.beta}°;
+периметр ${this.length()};
+площа ≈ ${this.square().toFixed(2)}.`;
+    }
+}
+
+// 1.2.22. Геттери та сеттери для Rhombus
+
+Object.defineProperties(Rhombus.prototype, {
+    a: {
+        get: function () {
+            return this._a;
+        },
+        set: function (value) {
+            if (!Number.isInteger(value) || value <= 0) {
+                throw new Error("Сторона має бути додатним цілим числом");
+            }
+
+            this._a = value;
+        }
+    },
+
+    alpha: {
+        get: function () {
+            return this._alpha;
+        },
+        set: function (value) {
+            if (!Number.isInteger(value) ||
+                value <= 90 || value >= 180) {
+                throw new Error("Тупий кут має бути в межах 91–179");
+            }
+
+            this._alpha = value;
+        }
+    },
+
+    beta: {
+        get: function () {
+            return this._beta;
+        },
+        set: function (value) {
+            if (!Number.isInteger(value) ||
+                value <= 0 || value >= 90) {
+                throw new Error("Гострий кут має бути в межах 1–89");
+            }
+
+            this._beta = value;
+        }
+    }
+});
+
+// 1.2.25–1.2.26. Функція Triangular
+
+function Triangular(a = 3, b = 4, c = 5) {
+    return { a, b, c };
+}
+
+// 1.2.27–1.2.28. Функція PiMultiplier
+
+function PiMultiplier(number) {
+    return function () {
+        return Math.PI * number;
+    };
+}
+
+// 1.2.29–1.2.31. Функція Painter
+
+function Painter(color) {
+    return function (obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, "type")) {
+            log(color + ": " + obj.type);
+        } else {
+            log(color + ": No ‘type’ property occurred!");
+        }
+    };
+}
+
+const PaintBlue = Painter("blue");
+const PaintRed = Painter("red");
+const PaintYellow = Painter("yellow");
+
+// Запуск усіх демонстрацій
+
+function runAll() {
+    output.textContent = "";
+
+    log("=== Автомобілі ===");
+    car1.drive();
+    car2.drive();
+    log("car1:", car1);
+    log("car2:", car2);
+
+    log("\n=== Вантажівки ===");
+
+    const truck1 = new Truck("black", 5000, 80, "Volvo", "FH");
+    const truck2 = new Truck("white", 3500, 70, "MAN", "TGX");
+
+    truck1.trip();
+
+    truck1.AssignDriver("Lisovodskyi", true, 8);
+    truck1.trip();
+
+    truck2.AssignDriver("Lisovodskyi", false, 4);
+    truck2.trip();
+
+    log("\n=== Геометричні фігури ===");
+
+    const figures = [
+        new Square(5),
+        new Rectangle(6, 4),
+        new Rhombus(5, 120, 60),
+        new Parallelogram(8, 4, 120, 60)
+    ];
+
+    for (const figure of figures) {
+        log(figure.constructor.name + ": " + figure.info());
+    }
+
+    log("Square:", Square.help());
+    log("Rectangle:", Rectangle.help());
+    log("Rhombus:", Rhombus.help());
+    log("Parallelogram:", Parallelogram.help());
+
+    const rhombus = new Rhombus(4, 120, 60);
+
+    rhombus.a = 6;
+    rhombus.alpha = 110;
+    rhombus.beta = 70;
+
+    log(
+        "Getter/setter Rhombus:",
+        rhombus.a,
+        rhombus.alpha,
+        rhombus.beta
+    );
+
+    log("\n=== Triangular ===");
+
+    log(Triangular());
+    log(Triangular(6, 8, 10));
+    log(Triangular(7, 7, 8));
+
+    log("\n=== PiMultiplier ===");
+
+    log("π × 2 =", PiMultiplier(2)());
+    log("π × 2/3 =", PiMultiplier(2 / 3)());
+    log("π ÷ 2 =", PiMultiplier(0.5)());
+
+    log("\n=== Painter ===");
+
+    const objects = [
+        { maxSpeed: 280, type: "Sportcar", color: "magenta" },
+        { type: "Truck", "avg speed": 90, "load capacity": 2400 },
+        { maxSpeed: 180, color: "purple", isCar: true }
+    ];
+
+    for (const obj of objects) {
+        PaintBlue(obj);
+        PaintRed(obj);
+        PaintYellow(obj);
+    }
+
+    document.getElementById("cars").textContent =
+        "car1: blue, 220; car2: red, 180. Методи drive виконані.";
+
+    document.getElementById("trucks").textContent =
+        "Створено 2 Truck; перевірено випадок без водія та нічне водіння.";
+
+    document.getElementById("shapes").textContent =
+        figures.map(f => f.constructor.name).join(", ") +
+        ". Виведено периметри, площі та кути.";
+
+    document.getElementById("functions").textContent =
+        "Triangular, PiMultiplier і три Painter-функції перевірено.";
+}
+
+runAll();
+</script>
+
+</body>
+</html>
